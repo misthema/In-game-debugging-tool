@@ -20,6 +20,8 @@ Requirements
 In-game debugging tool requires the free FontMachine module to work.
 You can get it [here](https://code.google.com/p/fontmachine/).
 
+Also, to get the dev-console to work properly, you're going to need do [this fix](http://www.jungleide.com/?topic=gettextwidth/#post-5719).
+
 
 Images
 ======
