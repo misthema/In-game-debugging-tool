@@ -29,6 +29,26 @@ Images
 Search for methods and call them with input
 ![Debugger in-action](http://puu.sh/aibkb/18155597ce.png)
 
+The code of the method called in the picture:
+```
+Method TestStringArray:String(arrStr:String[])
+    Local rtn:String = "Elements in array: "
+        
+    If arrStr.Length() > 0 Then
+        rtn += arrStr.Length()
+    Else
+        rtn += "0 :("
+    End If
+        
+    DevConsole.Log("DEBUG::Elements:",[128, 64, 64])
+    For Local i:= 0 Until arrStr.Length()
+        DevConsole.Log("  - " + arrStr[i])
+    End For
+        
+    Return "~q" + rtn + "~q"
+End Method
+```
+
 
 
 How-to
