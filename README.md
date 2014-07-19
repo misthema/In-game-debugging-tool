@@ -14,6 +14,13 @@ Please be aware that this tool is under heavy development and it might not be st
 Use at your own risk!
 
 
+Requirements
+============
+
+In-game debugging tool requires the free FontMachine module to work.
+You can get it [here](https://code.google.com/p/fontmachine/).
+
+
 Images
 ======
 
