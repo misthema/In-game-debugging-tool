@@ -24,19 +24,22 @@ End Class
 
 Class TestObject Implements IDebuggable
     Field x:Int, y:Int, width:Int, height:Int
+    Field xVel:Int, yVel:Int
     Field color:Color
     
     Function TestFunction:String(input:String)
         Return "I am a function! Input was: " + input
     End Function
     
-    Global testGlobal:Float
+    Global testGlobal:Bool
     
     Method New()
         x = Rnd() * DeviceWidth()
         y = Rnd() * DeviceHeight()
         width = Rnd() * 100
         height = Rnd() * 100
+        xVel = 1
+        yVel = 1
         
         color = New Color(Rnd() * 255, Rnd() * 255, Rnd() * 255)
     End Method
@@ -51,6 +54,27 @@ Class TestObject Implements IDebuggable
         Return "I am a Method! Input was: " + input
     End Method
     
+    Method TestArray:String[] ()
+        Return["Hello", "World!"]
+    End Method
+    
+    Method TestStringArray:String(arrStr:String[])
+        Local rtn:String = "Elements in array: "
+        
+        If arrStr.Length() > 0 Then
+            rtn += arrStr.Length()
+        Else
+            rtn += "0 :("
+        End If
+        
+        DevConsole.Log("DEBUG::Elements:",[128, 64, 64])
+        For Local i:= 0 Until arrStr.Length()
+            DevConsole.Log("  - " + arrStr[i])
+        End For
+        
+        Return "~q" + rtn + "~q"
+    End Method
+    
     Method TestMethod2:String(i:Int, f:Float, b:Bool, s:String)
         Local _bool:String
         If b Then _bool = "True" Else _bool = "False"
@@ -63,11 +87,15 @@ Class TestObject Implements IDebuggable
     End Method
     
     Method OnUpdate:Void()
-        x += 1
-        y += 1
+        ' Apply velocities
+        x += xVel
+        y += yVel
         
-        If x >= DeviceWidth() x = -width
-        If y >= DeviceHeight() y = -height
+        ' Don't let the boxes escape!
+        If x < - width x = DeviceWidth()
+        If y < - height y = DeviceHeight()
+        If x > DeviceWidth() x = -width
+        If y > DeviceHeight() y = -height
     End Method
 
     ' Very basic implementation. Returns TRUE if mouse hits the object
@@ -128,6 +156,10 @@ Class Game Extends App
         DevConsole.Init()
         DevConsole.AddObjects(objectList)
         
+        DevConsole.Watch(["xVel", "yVel"])
+        DevConsole.GlobalWatch("TestObject",["testGlobal"])
+        DevConsole.GlobalWatch("CustomMouseClass",["mx","my"])
+        
         ' Un-comment the line below to set up custom mouse. This mouse will be +32,+32px off ;)
         'DevConsole.SetupCustomMouseSingleton("CustomMouseClass",["mx", "my"])
 			
@@ -148,6 +180,12 @@ Class Game Extends App
         Local k:Int = GetChar()
         If KeyHit(KEY_TAB) Then DevConsole.SetEnabled( Not DevConsole.Enabled())
         If KeyHit(KEY_TILDE) or k = 167 Then DevConsole.SetConsoleOpen( Not DevConsole.ConsoleOpen())
+        
+        If KeyDown(KEY_SPACE) Then
+            TestObject.testGlobal = True
+        Else
+            TestObject.testGlobal = False
+        End If
     
 		Return 0
 	End
