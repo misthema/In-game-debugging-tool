@@ -30,10 +30,10 @@ Also, to get the dev-console to work properly, you're going to need do [this fix
 Images
 ======
 
-Search for methods and call them with input
+Search for methods and call them with input:
 ![Debugger in-action](http://puu.sh/aibkb/18155597ce.png)
 
-Setting values into fields
+Setting values into fields:
 ![Setting values into fields](http://puu.sh/akF58/2ebf433e63.png)
 
 The code of the method called in the picture:
