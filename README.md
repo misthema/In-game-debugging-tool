@@ -38,7 +38,7 @@ Setting values into fields:
 ![Setting values into fields](http://puu.sh/akF58/2ebf433e63.png)
 
 The code of the method called in the picture:
-```
+```monkey
 Method TestStringArray:String(arrStr:String[])
     Local rtn:String = "Elements in array: "
         
@@ -63,7 +63,7 @@ How-to
 ======
 
 Basic implementation:
-```
+```monkey
 #REFLECTION_FILTER="what.ever.you.need"
 
 Import ingamedebugtool
@@ -89,7 +89,7 @@ DevConsole.Render()
 
 
 Adding fields and globals to watch:
-```
+```monkey
 'Use these after initialization.
 
 'These will be showed for selected objects. (left side of the screen)
