@@ -61,4 +61,42 @@ End Method
 
 How-to
 ======
-Coming soon!
+
+Basic implementation:
+```
+#REFLECTION_FILTER="what.ever.you.need"
+
+Import ingamedebugtool
+
+...
+
+'In your create method
+DevConsole.Init()
+
+...
+
+'In your update method
+DevConsole.Update()
+
+...
+
+'In you render method
+DevConsole.Render()
+
+
+'And you're done!
+```
+
+
+Adding fields and globals to watch:
+```
+'Use these after initialization.
+
+'These will be showed for selected objects. (left side of the screen)
+DevConsole.Watch(["fieldVar1", "fieldVar2", ..."fieldVarN"])
+
+'These will be showed for classes. (right side of the screen)
+DevConsole.GlobalWatch("ClassName", ["globalVar1", "globalVar2", ..."fieldVarN"])
+```
+
+And that's it!
