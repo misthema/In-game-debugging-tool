@@ -13,6 +13,10 @@ to drag & drop game objects and use dev-console for various things;
 Please be aware that this tool is under heavy development and it might not be stable - at all.
 Use at your own risk!
 
+Test It!
+========
+[HTML5 demo](http://misthema.anapnea.net/igdt/)
+
 
 Requirements
 ============
