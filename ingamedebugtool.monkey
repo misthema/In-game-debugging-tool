@@ -23,10 +23,37 @@
 
 Strict
 
-Import "data/console/console.txt"
-Import "data/console/console_P_1.png"
-Import "data/console/consoleb.txt"
-Import "data/console/consoleb_P_1.png"
+#IF TARGET="glfw"
+    Import "data/console/console.txt"
+    Import "data/console/console_P_1.png"
+    Import "data/console/consoleb.txt"
+    Import "data/console/consoleb_P_1.png"
+    
+#ELSE IF TARGET="html5"
+    'Regular
+    Import "data/console/console.txt"
+    Import "data/console/console_P_1.png"
+    Import "data/console/html5/console_header.txt"
+    Import "data/console/html5/console_header_P_1.png"
+    Import "data/console/html5/console_red.txt"
+    Import "data/console/html5/console_red_P_1.png"
+    Import "data/console/html5/console_green.txt"
+    Import "data/console/html5/console_green_P_1.png"
+    Import "data/console/html5/console_blue.txt"
+    Import "data/console/html5/console_blue_P_1.png"
+    
+    'Bold
+    Import "data/console/consoleb.txt"
+    Import "data/console/consoleb_P_1.png"
+    Import "data/console/html5/console_headerb.txt"
+    Import "data/console/html5/console_headerb_P_1.png"
+    Import "data/console/html5/console_redb.txt"
+    Import "data/console/html5/console_redb_P_1.png"
+    Import "data/console/html5/console_greenb.txt"
+    Import "data/console/html5/console_greenb_P_1.png"
+    Import "data/console/html5/console_blueb.txt"
+    Import "data/console/html5/console_blueb_P_1.png"
+#END
 
 
 Import reflection
@@ -39,6 +66,30 @@ Import fontmachine
     Const DEBUG:Bool = True
 #ELSE
     Const DEBUG:Bool = False
+#END
+
+#IF TARGET="glfw"
+    'Fonts
+    Global consoleFont:BitmapFont, consoleFontB:BitmapFont
+    
+    'Colors
+    Global txtNormal:Int[] =[255, 255, 255]
+    Global txtHeader:Int[] =[128, 160, 255]
+    Global txtRed:Int[] =[255, 96, 96]
+    Global txtBlue:Int[] =[96, 128, 255]
+    Global txtGreen:Int[] =[128, 255, 96]
+    
+    
+#ELSE IF TARGET="html5"
+    'Fonts
+    Global font:= New BitmapFont[5]
+    Global fontB:= New BitmapFont[5]
+    
+    Global txtNormal:Int = ConsoleLogMessage.WHITE
+    Global txtHeader:Int = ConsoleLogMessage.HEADER
+    Global txtRed:Int = ConsoleLogMessage.RED
+    Global txtBlue:Int = ConsoleLogMessage.BLUE
+    Global txtGreen:Int = ConsoleLogMessage.GREEN
 #END
 
 Class InterfaceNotImplementedException Extends Throwable
@@ -76,6 +127,15 @@ Interface IDebuggable
     Method DebugOverlay:Void()
 End Interface
 
+' Muuttuja-luokka johon voi laittaa väliaikasia muuttujia talteen
+' Pitää pystyä tukemaan mitä tahansa tyyppiä, taulukkoa, fieldiä, functiota jne.
+Class Variable
+    Field name:String
+    Field value:Object
+    
+    
+End
+
 Class ConsoleLog
     Field log:= New List<ConsoleLogMessage>()
     
@@ -101,9 +161,23 @@ Class ConsoleLogMessage
     Const NORMAL:Int = 0
     Const BOLD:Int = 1
     Field msg:String
+    
+  #IF TARGET="glfw"
     Field r:Int = 255, g:Int = 255, b:Int = 255
+    
+  #ELSE IF TARGET="html5"
+    Const WHITE:Int = 0
+    Const HEADER:Int = 1
+    Const RED:Int = 2
+    Const GREEN:Int = 3
+    Const BLUE:Int = 4
+    Field color:Int
+    
+  #END
+  
     Field type:Int
     
+  #IF TARGET="glfw"
     Method New(msg:String, type:Int = NORMAL)
         Self.msg = msg
         Self.type = type
@@ -116,6 +190,20 @@ Class ConsoleLogMessage
         b = color[2]
         Self.type = type
     End Method
+    
+  #ELSE IF TARGET="html5"
+    Method New(msg:String, type:Int = NORMAL)
+        Self.msg = msg
+        Self.type = type
+        Self.color = WHITE
+    End Method
+    
+    Method New(msg:String, color:Int, type:Int)
+        Self.msg = msg
+        Self.color = color
+        Self.type = type
+    End Method
+  #END
 End Class
 
 Class TreeViewList
@@ -146,7 +234,7 @@ Class DevConsole
     ' Selectable objects
     Global selectable:List<Object>
     
-    Global consoleFont:BitmapFont, consoleFontB:BitmapFont
+    
     Global fontHeight:Int, spacing:Int = 8
     
     
@@ -161,10 +249,27 @@ Class DevConsole
         width = DeviceWidth() -128
         height = DeviceHeight() / 2
         
-        ' Load font
+        ' Load fonts
+      #IF TARGET="glfw"
         consoleFont = New BitmapFont("console.txt", True)
         consoleFontB = New BitmapFont("consoleb.txt", True)
         fontHeight = consoleFont.GetTxtHeight("X")
+        
+      #ELSE IF TARGET="html5"
+        font[0] = New BitmapFont("console.txt", True)
+        fontB[0] = New BitmapFont("consoleb.txt", True)
+        font[1] = New BitmapFont("console_header.txt", True)
+        fontB[1] = New BitmapFont("console_headerb.txt", True)
+        font[2] = New BitmapFont("console_red.txt", True)
+        fontB[2] = New BitmapFont("console_redb.txt", True)
+        font[3] = New BitmapFont("console_green.txt", True)
+        fontB[3] = New BitmapFont("console_greenb.txt", True)
+        font[4] = New BitmapFont("console_blue.txt", True)
+        fontB[4] = New BitmapFont("console_blueb.txt", True)
+        
+        fontHeight = font[0].GetTxtHeight("X")
+        
+      #END
         
         ' Logging
         log = New ConsoleLog()
@@ -173,6 +278,7 @@ Class DevConsole
         
         Local caption:= New ConsoleLogMessage(" - Welcome to In-game Debugging Tool! - ", ConsoleLogMessage.BOLD)
         Log(caption)
+        Log("To get started, type in 'help'.")
         
         ' Watch list prints
         _textLines = New StringList()
@@ -258,7 +364,7 @@ Class DevConsole
     ' Prints a message to console
     Function Log:Void(msg:String)
         If Not DEBUG Then Return
-        log.Add(msg)
+        log.Add(New ConsoleLogMessage(msg, txtNormal, 0))
         currentLine += 1
         
         ' Default printing
@@ -276,6 +382,7 @@ Class DevConsole
         
     End Function
     
+  #IF TARGET="glfw"
     Function Log:Void(msg:String, color:Int[])
         If Not DEBUG Then Return
         log.Add(New ConsoleLogMessage(msg, color))
@@ -285,6 +392,18 @@ Class DevConsole
         If useDefaultPrint Then Print(msg)
         
     End Function
+    
+  #ELSE IF TARGET="html5"
+    Function Log:Void(msg:String, color:Int)
+        If Not DEBUG Then Return
+        log.Add(New ConsoleLogMessage(msg, color, 0))
+        currentLine += 1
+        
+        ' Default printing
+        If useDefaultPrint Then Print(msg)
+        
+    End Function
+  #END
     
     Function Scroll:Void(val:Int)
         If not _canScroll Then Return
@@ -499,6 +618,15 @@ Class DevConsole
                 'If KeyDown(KEY_SHIFT) Then
                 '    SelectObjects(_selX, _selY, _selW, _selH, False)
                 'Else
+                If _selW < 0 Then
+                    _selX += _selW
+                    _selW = Abs(_selW)
+                End
+                
+                If _selH < 0 Then
+                    _selY += _selH
+                    _selH = Abs(_selH)
+                End
                     SelectObjects(_selX, _selY, _selW, _selH)
                 'End If
             End If
@@ -648,9 +776,14 @@ Class DevConsole
                 End For
             End If
             
-            ' Show FPS
             SetColor(255, 255, 255)
+            
+            ' Show FPS
+          #IF TARGET="glfw"
             consoleFont.DrawText("FPS: " + _fps, 2, 0)
+          #ELSE IF TARGET="html5"
+            font[0].DrawText("FPS: " + _fps, 2, 0)
+          #END
             
             DrawWatches()
             
@@ -658,11 +791,19 @@ Class DevConsole
             If _showHelp Then
                 Local i:Int = 0
                 For Local help:= EachIn _helps
+                  #IF TARGET="glfw"
                     consoleFont.DrawText(help, 2, fontHeight + fontHeight * i)
+                  #ELSE IF TARGET = "html5"
+                    font[0].DrawText(help, 2, fontHeight + fontHeight * i)
+                  #END
                     i += 1
                 End For
             Else
+              #IF TARGET="glfw"
                 consoleFont.DrawText("[H]elp", 2, fontHeight)
+              #ELSE IF TARGET="html5"
+                font[0].DrawText("[H]elp", 2, fontHeight)
+              #END
             End If
             
             ' Draw console and log texts
@@ -700,7 +841,11 @@ Class DevConsole
                 tY = startHeight + curLine * fontHeight
                     
                 ' Draw text line
+              #IF TARGET="glfw"
                 consoleFont.DrawText(line, 4, tY)
+              #ELSE IF TARGET="html5"
+                font[0].DrawText(line, 4, tY)
+              #END
                     
                 ' Increment current line
                 curLine += 1
@@ -726,7 +871,11 @@ Class DevConsole
                 tY = startHeight + curLine * fontHeight
                     
                 ' Draw text line
+              #IF TARGET="glfw"
                 consoleFont.DrawText(line, tX, tY, 3)
+              #ELSE IF TARGET="html5"
+                font[0].DrawText(line, tX, tY, 3)
+              #END
                     
                 ' Increment current line
                 curLine += 1
@@ -773,23 +922,38 @@ Class DevConsole
         SetAlpha(1.0)
         SetColor(255, 255, 255)
         
-        Local i:Int = 0, font:BitmapFont = consoleFont
+        Local i:Int = 0
+        Local f:BitmapFont
         _tempTexts = log.ToArray()[scroll .. log.Count()]
         
         ' Draw log texts
         For Local clm:ConsoleLogMessage = EachIn _tempTexts
             
             ' Select correct font
+          #IF TARGET="glfw"
+            SetColor(clm.r, clm.g, clm.b)
+            f = consoleFont
             Select clm.type
                 Case 0 'NORMAL
-                    font = consoleFont
+                    f = consoleFont
                 Case 1 'BOLD
-                    font = consoleFontB
+                    f = consoleFontB
             End Select
             
+          #ELSE IF TARGET="html5"
+            f = font[clm.color]
+            Select clm.type
+                Case 0 'NORMAL
+                    f = font[clm.color]
+                Case 1 'BOLD
+                    f = fontB[clm.color]
+                Default
+                    f = font[clm.color]
+            End Select
+          #END
+            
             tY = startY - i * fontHeight
-            SetColor(clm.r, clm.g, clm.b)
-            font.DrawText(clm.msg, x + 1, tY)
+            f.DrawText(clm.msg, x + 1, tY)
             i += 1
         End For
         
@@ -815,12 +979,6 @@ Class DevConsole
         Local scrollBarArea:float
         Local scrollableArea:Float
         
-        #REM
-        var scrollTrackSpace = Self.contentHeight - Self.viewportHeight; / / (600 - 200) = 400
-        var scrollThumbSpace =  self.viewportHeight - self.thumbHeight; // (200 - 50) = 150
-        var scrollJump = scrollTrackSpace / scrollThumbSpace; //  (400 / 150 ) = 2.666666666666667
-        #END
-        
         SetAlpha(0.1)
         SetColor(128, 160, 255)
         DrawRect(x, y, w, h) 'base fill
@@ -830,16 +988,7 @@ Class DevConsole
             SetAlpha(0.2)
             DrawRect(x, y, w, arrowSize) 'top arrow
             DrawRect(x, y + h - arrowSize, w, arrowSize) 'bot arrow
-            
-            SetAlpha(0.5)
-            
-            #REM
-            var viewableRatio = viewportHeight / contentHeight; // 1/3 or 0.333333333n
-
-            var scrollBarArea = viewportHeight - arrowHeight * 2; // 150px
-
-            var thumbHeight = scrollBarArea * viewableRatio; // 50px
-            #END
+           
             ' Please do not questionalize this... It was really terrible to make :-D
             vPortSize = h
             contentSize = log.Count() * fontHeight
@@ -855,6 +1004,7 @@ Class DevConsole
                 _canScroll = False
             End If
             
+            SetAlpha(0.5)
             DrawRect(x, (y + scrollBarArea + arrowSize - thumbSize / 2) - (thumbPos + thumbSize / 2), w, thumbSize) 'scroll-thumb
         End If
     End Function
@@ -955,27 +1105,38 @@ Class DevConsole
 End Class
 
 
+
+
+' /////////////////////////////////////////////////
+' //       DevConsoleInput
+' /////////////////////////////////////////////////
 Class DevConsoleInput
     Global text:String, chars:= New Stack<Int>(), char:Int, cursorPos:Int, cursorBlink:Bool = False, blinkTimer:Float = 0
     Global oldTexts:String[] = New String[1], currentOld:Int
     Global tempInputTypes:ClassInfo[] =[]
     
-    'Colors
-    Global txtHeader:Int[] =[128, 160, 255]
-    Global txtRed:Int[] =[255, 96, 96]
-    Global txtBlue:Int[] =[96, 128, 255]
-    Global txtGreen:Int[] =[128, 255, 96]
+    
     
     Function Draw:Void(x:Float, y:Float)
         ' Draw text
-        DevConsole.consoleFont.DrawText("> " + text, x, y)
+        #IF TARGET="glfw"
+        consoleFont.DrawText("> " + text, x, y)
         
         ' Show cursor
         If cursorBlink
-            ' For some reason this cursor goes a little bit off after few letters...
-            Local curPos:Int = DevConsole.consoleFont.GetTxtWidth("> " + text[0 .. cursorPos]) - (DevConsole.consoleFont.GetTxtWidth("|")/2)
-            DevConsole.consoleFont.DrawText("|", x + curPos, y)
+            Local curPos:Int = consoleFont.GetTxtWidth("> " + text[0 .. cursorPos]) - (consoleFont.GetTxtWidth("|") / 2)
+            consoleFont.DrawText("|", x + curPos, y)
         End
+        
+      #ELSE IF TARGET="html5"
+        font[0].DrawText("> " + text, x, y)
+        
+        ' Show cursor
+        If cursorBlink
+            Local curPos:Int = font[0].GetTxtWidth("> " + text[0 .. cursorPos]) - (font[0].GetTxtWidth("|") / 2)
+            font[0].DrawText("|", x + curPos, y)
+        End
+      #END
     End
     
     Function Update:Void()
@@ -1040,10 +1201,10 @@ Class DevConsoleInput
     
     Private
     Function Old:Void(dir:Int)
+        currentOld += dir
         If currentOld < 0 currentOld = oldTexts.Length() -1
         If currentOld >= oldTexts.Length() currentOld = 0
         text = oldTexts[currentOld]
-        currentOld -= dir
         cursorPos = text.Length()
     End
     
@@ -1069,17 +1230,17 @@ Class DevConsoleInput
             Case "help"
                 DevConsole.Log("Commands:", txtHeader)
                 DevConsole.Log("help - ~qShows this help~q, said Cpt. Obvious", txtBlue)
-                DevConsole.Log("get_obj - Get object's properties", txtBlue)
-                DevConsole.Log("set_obj - Set object's field values", txtBlue)
-                DevConsole.Log("call_obj - Call object's method", txtBlue)
-                DevConsole.Log("get_class - Get class's properties", txtBlue)
-                DevConsole.Log("set_class - Set class's global values [N.I]", txtBlue)
-                DevConsole.Log("call_class - Call class's functions [N.I]", txtBlue)
+                DevConsole.Log("get_obj <what> - Get object's properties", txtBlue)
+                DevConsole.Log("set_obj <field> <value> - Set object's field values", txtBlue)
+                DevConsole.Log("call_obj <method> [input]- Call object's method", txtBlue)
+                DevConsole.Log("get_class <what> - Get class's properties", txtBlue)
+                DevConsole.Log("set_class <global> <value> - Set class's global values", txtBlue)
+                DevConsole.Log("call_class <function> [input] - Call class's functions", txtBlue)
                 DevConsole.Log("")
-                DevConsole.Log("PGUP/PGDOWN to scroll console texts.", txtBlue)
+                DevConsole.Log("PGUP/PGDOWN to scroll console.", txtBlue)
+                DevConsole.Log("UP/DOWN to scroll old inputs.", txtBlue)
                 DevConsole.Log("")
-                DevConsole.Log("Using commands without parameters will show", txtBlue)
-                DevConsole.Log("more help. [N.I] means ~qNot Implemented~q.", txtBlue)
+                DevConsole.Log("Using commands without parameters will show more help", txtBlue)
                 DevConsole.Log("")
                 
                 
@@ -1126,7 +1287,10 @@ Class DevConsoleInput
                     Local obj:Object = objs.First()
                     
                     If argsLen = 3
-                        Command_Obj_Set(obj, args[1], args[2])
+                        input = input.Replace(args[0], "").Replace(args[1], "").Trim()
+                        Command_Obj_Set(obj, args[1], input)
+                    Else
+                        DevConsole.Log("Invalid parameters.", txtRed)
                     End If
                     
                 Else
@@ -1134,7 +1298,12 @@ Class DevConsoleInput
                 End If
                 
             Case "set_class"
-            
+                If argsLen = 3
+                    input = input.Replace(args[0], "").Replace(args[1], "").Replace(args[2], "").Trim()
+                    Command_Class_Set(args[1], args[2], input)
+                Else
+                    DevConsole.Log("Invalid parameters.", txtRed)
+                End
             
             Case "call_obj"
                 Local objs:List<Object> = DevConsole.SelectedObjects()
@@ -1149,15 +1318,45 @@ Class DevConsoleInput
                     Else If argsLen = 2
                         Command_Obj_Call(obj, args[1], "")
                     Else
-                        DevConsole.Log("Invalid format. Should be 'call_obj <method> <param1>, <param2>, ..<paramN>", txtRed)
+                        DevConsole.Log("Invalid format. Should be 'call_obj <method> [<param1>, ..<paramN>]", txtRed)
                     End If
                     
                 Else
                     DevConsole.Log("Nothing to call; no object selected.", txtRed)
                 End If
                 
+            Case "call_class"
+                If argsLen > 3 Then
+                    input = input.Replace(args[0], "").Replace(args[1], "").Replace(args[2], "").Trim()
+                    Command_Class_Call(args[1], args[2], input)
+                Else If argsLen = 3
+                    Command_Class_Call(args[1], args[2], "")
+                Else
+                    DevConsole.Log("Invalid format. Should be 'call_class <class> <function> [<param1>, ..<paramN>]", txtRed)
+                End
+                
             Case "stop"
                 DebugStop()
+                
+                
+            Case "watch_obj"
+                If argsLen > 1 Then
+                    Local className:String = args[1]
+                    input = input.Replace(args[0], "").Replace("~q", "").Replace("[", "").Replace("]", "").Replace(" ", "").Trim()
+                    Local parsed:String[] = input.Split(",")
+                    
+                    If GetClass(className) <> Null Then
+                        DevConsole.Watch(parsed, className)
+                    Else
+                        DevConsole.Watch(parsed)
+                    End
+                    
+                    DevConsole.Log("Added to watch: " + input)
+                    
+                Else
+                    DevConsole.Log("Nothing to put into watch.", txtRed)
+                    DevConsole.Log("Use String-arrays with this command.", txtBlue)
+                End
         End
     End
     
@@ -1363,9 +1562,9 @@ Class DevConsoleInput
             Return[]
         End If
         
-        Local parsed:String[10], current:Int = 0
+        Local parsed:String[input.Split(",").Length()], current:Int = 0
         Local char:String
-        tempInputTypes = New ClassInfo[10]
+        tempInputTypes = New ClassInfo[parsed.Length()]
         
         For Local i:= 0 Until input.Length()
         
@@ -1390,7 +1589,7 @@ Class DevConsoleInput
                 parsed[current] = ReadString(input, i)
                 tempInputTypes[current] = StringClass()
                 
-                i += parsed[current].Length()
+                i += parsed[current].Length() +1 '
                 current += 1
             
             Else If char = "[" Then
@@ -1413,8 +1612,8 @@ Class DevConsoleInput
         End For
         
         ' Resize array so there's no empty cells
-        parsed = parsed.Resize(current)
-        tempInputTypes = tempInputTypes.Resize(current)
+        'parsed = parsed.Resize(current)
+        'tempInputTypes = tempInputTypes.Resize(current)
         
         Return parsed
     End Function
@@ -1891,18 +2090,66 @@ Class DevConsoleInput
         Local fInfo:MethodInfo = cInfo.GetMethod(methodName, inputTypes)
         Local output:Object, args:Object[]
         
-        If fInfo <> Null Then
-            args = BuildMethodInput(parsedInput, fInfo.ParameterTypes)
-        
-            output = fInfo.Invoke(obj, args)
-        
-            If output <> Null
-                DevConsole.Log("Method output: " + ParseValue(output, fInfo.ReturnType), txtGreen)
+        If obj <> Null Then
+            If fInfo <> Null Then
+                args = BuildMethodInput(parsedInput, fInfo.ParameterTypes)
+            
+                output = fInfo.Invoke(obj, args)
+            
+                If output <> Null
+                    DevConsole.Log("Method output: " + ParseValue(output, fInfo.ReturnType), txtGreen)
+                Else
+                    DevConsole.Log("Method has no output.", txtGreen)
+                End If
             Else
-                DevConsole.Log("Method has no output.", txtGreen)
+                DevConsole.Log("Method '" + methodName + "' not found.", txtRed)
             End If
         Else
-            DevConsole.Log("Method '" + methodName + "' not found.", txtRed)
+            DevConsole.Log("No object selected.", txtRed)
+        End If
+        
+    End Function
+    
+    Function Command_Class_Set:Void(className:String, globalName:String, value:String)
+        Local cInfo:ClassInfo = GetClass(className)
+        Local fInfo:GlobalInfo = cInfo.GetGlobal(globalName)
+        
+        If fInfo <> Null Then
+            Local boxValue:Object = BoxValue(value, fInfo.Type)
+            If boxValue <> Null Then
+                fInfo.SetValue(boxValue)
+                DevConsole.Log(fInfo.Name + " = " + value, txtGreen)
+            Else
+                DevConsole.Log("Failed to set value. Global type is " + ParseTypeName(fInfo.Type) + ".", txtRed)
+            End If
+        End If
+        
+    End Function
+    
+    Function Command_Class_Call:Void(className:String, functionName:String, input:String)
+        Local parsedInput:String[] = ParseInput(input)
+        Local inputTypes:ClassInfo[] = tempInputTypes 'GuessInputTypes(parsedInput)
+        
+        Local cInfo:ClassInfo = GetClass(className)
+        Local fInfo:FunctionInfo = cInfo.GetFunction(functionName, inputTypes)
+        Local output:Object, args:Object[]
+        
+        If cInfo <> Null Then
+            If fInfo <> Null Then
+                args = BuildMethodInput(parsedInput, fInfo.ParameterTypes)
+            
+                output = fInfo.Invoke(args)
+            
+                If output <> Null
+                    DevConsole.Log("Function output: " + ParseValue(output, fInfo.ReturnType), txtGreen)
+                Else
+                    DevConsole.Log("Function has no output.", txtGreen)
+                End If
+            Else
+                DevConsole.Log("Function '" + className + "." + functionName + "' not found.", txtRed)
+            End If
+        Else
+            DevConsole.Log("Class '" + className + "' not found.", txtRed)
         End If
         
     End Function
@@ -1923,10 +2170,9 @@ Class DevConsoleInput
     '// Help texts
     '
     Function Help_Command_Get_Obj:Void()
-        DevConsole.Log("Usage: get_obj <what> [name]", txtBlue)
+        DevConsole.Log("Usage: get_obj <what>", txtBlue)
         DevConsole.Log("Available <what>s:", txtBlue)
         DevConsole.Log("  field, global, const, method, func, super, all", txtBlue)
-        DevConsole.Log("If [name] is not used, all fields/globals etc will be printed.", txtBlue)
     End Function
     
     Function Help_Command_Get_Class:Void()

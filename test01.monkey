@@ -25,7 +25,7 @@ End Class
 Class TestObject Implements IDebuggable
     Field x:Int, y:Int, width:Int, height:Int
     Field xVel:Int, yVel:Int
-    Field color:Color
+    Field color:= New Int[3]
     
     Function TestFunction:String(input:String)
         Return "I am a function! Input was: " + input
@@ -41,7 +41,10 @@ Class TestObject Implements IDebuggable
         xVel = 1
         yVel = 1
         
-        color = New Color(Rnd() * 255, Rnd() * 255, Rnd() * 255)
+        'color = New Color(Rnd() * 255, Rnd() * 255, Rnd() * 255)
+        color[0] = Rnd() * 255
+        color[1] = Rnd() * 255
+        color[2] = Rnd() * 255
     End Method
     
     ' These properties are needed by the debugging tool system for drag&drop.
@@ -67,9 +70,9 @@ Class TestObject Implements IDebuggable
             rtn += "0 :("
         End If
         
-        DevConsole.Log("DEBUG::Elements:",[128, 64, 64])
+        DevConsole.Log("DEBUG::Elements:", txtRed)
         For Local i:= 0 Until arrStr.Length()
-            DevConsole.Log("  - " + arrStr[i])
+            DevConsole.Log("  - " + arrStr[i], txtRed)
         End For
         
         Return "~q" + rtn + "~q"
@@ -82,7 +85,7 @@ Class TestObject Implements IDebuggable
     End Method
     
     Method OnRender:Void()
-        SetColor(color.r, color.g, color.b)
+        SetColor(color[0], color[1], color[2])
         DrawRect(x, y, width, height)
     End Method
     
@@ -158,7 +161,7 @@ Class Game Extends App
         
         DevConsole.Watch(["xVel", "yVel"])
         DevConsole.GlobalWatch("TestObject",["testGlobal"])
-        DevConsole.GlobalWatch("CustomMouseClass",["mx","my"])
+        DevConsole.GlobalWatch("CustomMouseClass",["mx", "my"])
         
         ' Un-comment the line below to set up custom mouse. This mouse will be +32,+32px off ;)
         'DevConsole.SetupCustomMouseSingleton("CustomMouseClass",["mx", "my"])
