@@ -97,8 +97,11 @@ Adding fields and globals to watch:
 ```monkey
 'Use these after initialization.
 
-'These will be showed for selected objects. (left side of the screen)
+'These will be showed for selected (all) objects. (left side of the screen)
 DevConsole.Watch(["fieldVar1", "fieldVar2", ..."fieldVarN"])
+
+'These will be showed for selected (specific class) objects. (left side of the screen)
+DevConsole.Watch(["fieldVar1", "fieldVar2", ..."fieldVarN"], "MyClass")
 
 'These will be showed for classes. (right side of the screen)
 DevConsole.GlobalWatch("ClassName", ["globalVar1", "globalVar2", ..."fieldVarN"])
