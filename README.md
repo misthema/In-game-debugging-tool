@@ -37,7 +37,12 @@ Setting values into fields:
 
 ![Setting values into fields](http://puu.sh/akF58/2ebf433e63.png)
 
-The code of the method called in the picture:
+Adding properties to watch-list:
+
+![Watch list testing](http://puu.sh/aoW5g/7224b9c747.png)
+
+
+The code of the method called in the first picture:
 ```monkey
 Method TestStringArray:String(arrStr:String[])
     Local rtn:String = "Elements in array: "
